@@ -99,3 +99,7 @@ love.plot(match_obj, stats = "m", binary = "std", threshold = .1,
 -   **var.names = v** displays the vector v that describes the variable names
 
 As we can see in the love plot, without matching, recipients of en blocs from donors \< 8kg have significantly different values of EPTS characteristics than recipients of sequence A SKTs. By matching on these characteristics, we are able to identify patients who have similar values for these characteristics, leading to standardized mean differences that are all below 0.1.
+
+References:
+
+Austin PC. An Introduction to Propensity Score Methods for Reducing the Effects of Confounding in Observational Studies. *Multivariate Behav Res*. 2011;46(3):399-424. doi:10.1080/00273171.2011.568786
