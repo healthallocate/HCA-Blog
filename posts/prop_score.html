@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Molly White">
+<meta name="dcterms.date" content="2024-02-07">
 
-<title>HCA Blog</title>
+<title>HCA Blog - Propensity score matching</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,27 +22,59 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,77 +102,19 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
 
-    const options = {
-      valueNames: ['listing-title','listing-author','listing-date','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description","listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">HCA Blog</span>
     </a>
   </div>
@@ -153,67 +129,233 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Analysis">Analysis <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Kidney Allocation">Kidney Allocation <span class="quarto-category-count">(1)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(1)</span></div></div></div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Propensity score matching</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Analysis</div>
+    <div class="quarto-category">Kidney Allocation</div>
+    <div class="quarto-category">R</div>
+  </div>
+  </div>
 
 
 
-<section id="welcome-to-the-healthcare-allocation-lab-blog" class="level3">
-<h3 class="anchored" data-anchor-id="welcome-to-the-healthcare-allocation-lab-blog">Welcome to the Healthcare Allocation Lab Blog!</h3>
-<p>Here you will find instructional posts on best statistical practices when working with data from the Scientific Registry of Transplant Recipients (SRTR).</p>
-<p>For source code from our projects, please visit <a href="https://github.com/healthallocate" class="uri">https://github.com/healthallocate</a></p>
-</section>
-<section id="posts" class="level3">
-<h3 class="anchored" data-anchor-id="posts">Posts</h3>
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Molly White </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 7, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this post, we will explain the methodology and applications of propensity score matching.</p>
+<p>The purpose of propensity score matching is to identify observations where the covariates that determine assignment to a particular group have similar values across different groups. In our example, we want to identify recipients of single kidney transplants whose Expected Post Transplant Survival (EPTS) characteristics are similar to those of recipients of en bloc kidneys. By identifying such patients, we will be able to better compare post-transplant survival outcomes by accounting for other possible confounding factors. In this case, these covariates are age, dialysis, diabetes, and previous transplant.</p>
+<p>Note that we did <strong>not</strong> match based on donor characteristics. This is because after donor kidneys are assigned a sequence, they are treated equally to other kidneys in that sequence, so donor characteristics have no additional influence on assignment to each patient. When propensity score matching it is important to match only on those covariates which impact assignment of the treatment to each group.</p>
+<p>Here’s a look at our dataframe:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 8%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 19%">
+<col style="width: 8%">
+<col style="width: 14%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">PX_ID</th>
+<th style="text-align: right;">enbloc_under8</th>
+<th style="text-align: right;">REC_AGE_AT_TX</th>
+<th style="text-align: right;">dialysis_duration</th>
+<th style="text-align: right;">no_dial</th>
+<th style="text-align: right;">rec_diabetes</th>
+<th style="text-align: right;">CAN_PREV_TX</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">1423051</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">1.7397260</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">33</td>
+<td style="text-align: right;">1336277</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">46</td>
+<td style="text-align: right;">1375918</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">73</td>
+<td style="text-align: right;">1384452</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">80</td>
+<td style="text-align: right;">1331786</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">2.7315068</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">101</td>
+<td style="text-align: right;">1337163</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">1.8246575</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">104</td>
+<td style="text-align: right;">1331806</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">0.4958904</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">106</td>
+<td style="text-align: right;">1421143</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">107</td>
+<td style="text-align: right;">1343445</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">0.6136986</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">109</td>
+<td style="text-align: right;">1351642</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">0.9260274</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li><p><strong>PX_ID</strong> is a unique patient identifier</p></li>
+<li><p><strong>enbloc_under8</strong> is an indicator for whether the patient received an en bloc kidney from a donor weighing &lt; 8kg</p></li>
+<li><p><strong>REC_AGE_AT_TX</strong> is the recipient’s age at time of transplant</p></li>
+<li><p><strong>dialysis_duration</strong> is the time in years that a patient was on dialysis before transplant</p></li>
+<li><p><strong>no_dial</strong> is an indicator for whether the patient never received dialysis</p></li>
+<li><p><strong>rec_diabetes</strong> is an indicator for whether the patient had diabetes</p></li>
+<li><p><strong>CAN_PREV_TX</strong> is an indicator for whether the patient had received a transplant previously.</p></li>
+</ul>
+<p>In this example, we are going to do 1-to-1 matching, where for each recipient of an ebloc from a donor &lt; 8kg, we are finding 1 recipient of a sequence A SKT with similar characteristics. This is the most common form of propensity score matching but not the only (see Austin 2011)</p>
+<p>To perform propensity score matching, we use the <em>MatchIt</em> library in R. To ensure that the covariates are sufficiently similar, we include cross terms that allow the standardized mean differences of the covariates to be &lt; 0.1.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>match_obj <span class="ot">=</span> <span class="fu">matchit</span>(enbloc_under8 <span class="sc">~</span> REC_AGE_AT_TX <span class="sc">+</span> dialysis_duration <span class="sc">+</span> no_dial <span class="sc">+</span> rec_diabetes <span class="sc">+</span> CAN_PREV_TX <span class="sc">+</span> REC_AGE_AT_TX<span class="sc">*</span>no_dial <span class="sc">+</span> REC_AGE_AT_TX<span class="sc">*</span>rec_diabetes, <span class="at">data =</span> seq_a_data_under, <span class="at">method =</span> <span class="st">"nearest"</span>, <span class="at">distance =</span><span class="st">"glm"</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">ratio =</span> <span class="dv">1</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">replace =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Model specifications:</p>
+<ul>
+<li><p><strong>method = “nearest”</strong> specifies nearest neighbor matching</p></li>
+<li><p><strong>distance = “glm”</strong> specifies the estimation of propensity scores using logistic regression</p></li>
+<li><p><strong>ratio = 1</strong> specifies 1:1 matching</p></li>
+<li><p><strong>replace = “FALSE”</strong> specifies a unique SKT match for each en bloc recipient</p></li>
+</ul>
+<p>To return a dataset from this matching process, use the match.data() function as follows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>match_data_under <span class="ot">=</span> <span class="fu">match.data</span>(match_obj)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To visualize the standardized mean differences in the covariates, use the love.plot() function from the <em>cobalt</em> library</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(match_obj, <span class="at">stats =</span> <span class="st">"m"</span>, <span class="at">binary =</span> <span class="st">"std"</span>, <span class="at">threshold =</span> .<span class="dv">1</span>, </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">var.order =</span> <span class="st">"unadjusted"</span>, <span class="at">var.names =</span> v)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="prop_score_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p><strong>stats = “m”</strong> specifies the calculation of mean differences</p></li>
+<li><p><strong>binary = “std”</strong> specifies the standardized mean difference</p></li>
+<li><p><strong>threshold = 0.1</strong> includes boundary lines at -0.1 and 0.1 to display the threshold</p></li>
+<li><p><strong>var.order</strong> = “unadjusted” displays the variables in order from smallest to largest unadjusted standardized mean difference</p></li>
+<li><p><strong>var.names = v</strong> displays the vector v that describes the variable names</p></li>
+</ul>
+<p>As we can see in the love plot, without matching, recipients of en blocs from donors &lt; 8kg have significantly different values of EPTS characteristics than recipients of sequence A SKTs. By matching on these characteristics, we are able to identify patients who have similar values for these characteristics, leading to standardized mean differences that are all below 0.1.</p>
+<p>References:</p>
+<p>Austin PC. An Introduction to Propensity Score Methods for Reducing the Effects of Confounding in Observational Studies.&nbsp;<em>Multivariate Behav Res</em>. 2011;46(3):399-424. doi:10.1080/00273171.2011.568786</p>
 
 
 
-</section>
-
-<div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
-<div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-categories="Analysis,Kidney Allocation,R" data-listing-date-sort="1707285600000" data-listing-file-modified-sort="1707787920845" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="717">
-<a href="./posts/prop_score.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img src="posts\prop_score_files\figure-html\unnamed-chunk-5-1.png" style="height: 100%;"  class="thumbnail-image card-img"/></p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Propensity score matching
-</h5>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('Analysis'); return false;">
-Analysis
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('Kidney Allocation'); return false;">
-Kidney Allocation
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('R'); return false;">
-R
-</div>
-</div>
-<div class="card-text listing-description">
-In this post, we will explain the methodology and applications of propensity score matching.
-</div>
-<div class="card-attribution card-text-small justify">
-<div class="listing-author">
-Molly White
-</div>
-<div class="listing-date">
-Feb 7, 2024
-</div>
-</div>
-</div>
-</div>
-</a>
-</div>
-</div>
-<div class="listing-no-matching d-none">
-No matching items
-</div>
-</div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
