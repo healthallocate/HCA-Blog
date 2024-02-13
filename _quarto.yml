@@ -1,0 +1,20 @@
+project:
+  type: website
+
+website:
+  title: "HCA Blog"
+  search: true
+  navbar:
+    search: true
+    tools:
+      - icon: github
+        href: https://github.com/healthallocate
+
+format:
+  html:
+    theme: sandstone
+    css: styles.css
+    toc: false
+
+editor: visual
+

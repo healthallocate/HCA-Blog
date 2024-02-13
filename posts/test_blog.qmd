@@ -1,0 +1,101 @@
+---
+title: "Propensity score matching"
+author: "Molly White"
+categories: ["Analysis", "Kidney Allocation", "R"]
+date: "2/7/2024"
+---
+
+In this post, we will explain the methodology and applications of propensity score matching.
+
+The purpose of propensity score matching is to identify observations where the covariates that determine assignment to a particular group have similar values across different groups. In our example, we want to identify recipients of single kidney transplants whose Expected Post Transplant Survival (EPTS) characteristics are similar to those of recipients of en bloc kidneys. By identifying such patients, we will be able to better compare post-transplant survival outcomes by accounting for other possible confounding factors. In this case, these covariates are age, dialysis, diabetes, and previous transplant.
+
+Note that we did **not** match based on donor characteristics. This is because after donor kidneys are assigned a sequence, they are treated equally to other kidneys in that sequence, so donor characteristics have no additional influence on assignment to each patient. When propensity score matching it is important to match only on those covariates which impact assignment of the treatment to each group.
+
+Here's a look at our dataframe:
+
+```{r}
+#| echo: false
+#| warning: false
+
+library(dplyr)
+library(knitr)
+library(MatchIt)
+library(cobalt)
+load("C:/Users/mhwhi/Downloads/SQL/seq_a_data_under.Rdata")
+
+data = head(seq_a_data_under %>% select(PX_ID, enbloc_under8, REC_AGE_AT_TX, dialysis_duration, no_dial, rec_diabetes, CAN_PREV_TX), 10)
+
+knitr::kable(
+  data[1:10, 1:7]
+)
+```
+
+-   **PX_ID** is a unique patient identifier
+
+-   **enbloc_under8** is an indicator for whether the patient received an en bloc kidney from a donor weighing \< 8kg
+
+-   **REC_AGE_AT_TX** is the recipient's age at time of transplant
+
+-   **dialysis_duration** is the time in years that a patient was on dialysis before transplant
+
+-   **no_dial** is an indicator for whether the patient never received dialysis
+
+-   **rec_diabetes** is an indicator for whether the patient had diabetes
+
+-   **CAN_PREV_TX** is an indicator for whether the patient had received a transplant previously.
+
+In this example, we are going to do 1-to-1 matching, where for each recipient of an ebloc from a donor \< 8kg, we are finding 1 recipient of a sequence A SKT with similar characteristics. This is the most common form of propensity score matching but not the only (see Austin 2011)
+
+To perform propensity score matching, we use the *MatchIt* library in R. To ensure that the covariates are sufficiently similar, we include cross terms that allow the standardized mean differences of the covariates to be \< 0.1.
+
+```{r}
+match_obj = matchit(enbloc_under8 ~ REC_AGE_AT_TX + dialysis_duration + no_dial + rec_diabetes + CAN_PREV_TX + REC_AGE_AT_TX*no_dial + REC_AGE_AT_TX*rec_diabetes, data = seq_a_data_under, method = "nearest", distance ="glm",
+  ratio = 1,
+  replace = FALSE)
+```
+
+Model specifications:
+
+-   **method = "nearest"** specifies nearest neighbor matching
+
+-   **distance = "glm"** specifies the estimation of propensity scores using logistic regression
+
+-   **ratio = 1** specifies 1:1 matching
+
+-   **replace = "FALSE"** specifies a unique SKT match for each en bloc recipient
+
+To return a dataset from this matching process, use the match.data() function as follows:
+
+```{r}
+match_data_under = match.data(match_obj)
+
+```
+
+To visualize the standardized mean differences in the covariates, use the love.plot() function from the *cobalt* library
+
+```{r}
+#| echo = FALSE
+v = data.frame(old = c("rec_htn", "dialysis_duration", "no_dial", "REC_AGE_AT_TX", "CAN_PREV_TX", 
+                        "rec_diabetes", "distance"),
+                new = c("Hypertension", "Dialysis Duration", "Never Dialyzed", "Age", "Previous Transplant", "Diabetes", "Propensity Score"))
+
+
+```
+
+```{r}
+love.plot(match_obj, stats = "m", binary = "std", threshold = .1, 
+          var.order = "unadjusted", var.names = v)
+
+```
+
+-   **stats = "m"** specifies the calculation of mean differences
+
+-   **binary = "std"** specifies the standardized mean difference
+
+-   **threshold = 0.1** includes boundary lines at -0.1 and 0.1 to display the threshold
+
+-   **var.order** = "unadjusted" displays the variables in order from smallest to largest unadjusted standardized mean difference
+
+-   **var.names = v** displays the vector v that describes the variable names
+
+As we can see in the love plot, without matching, recipients of en blocs from donors \< 8kg have significantly different values of EPTS characteristics than recipients of sequence A SKTs. By matching on these characteristics, we are able to identify patients who have similar values for these characteristics, leading to standardized mean differences that are all below 0.1.

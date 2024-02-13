@@ -1,0 +1,20 @@
+---
+project:
+  type: website
+  output-dir: docs
+  
+listing:
+  contents: posts
+  type: grid
+  image-height: "100%"
+  categories: true
+  sort: "date desc"
+---
+
+### Welcome to the Healthcare Allocation Lab Blog!
+
+Here you will find instructional posts on best statistical practices when working with data from the Scientific Registry of Transplant Recipients (SRTR).
+
+For source code from our projects, please visit <https://github.com/healthallocate>
+
+### Posts
