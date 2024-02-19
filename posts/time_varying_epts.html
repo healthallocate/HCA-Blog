@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.547">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>HCA Blog - Time Varying EPTS</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">HCA Blog</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools">
+    <a href="https://github.com/healthallocate" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Time Varying EPTS</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In the SRTR Standard Analysis Files, the CAND_KIPA file includes information on candidates listed for kidney and/or pancreas transplants. From this file, it is possible to calculate a candidate EPTS score at listing, but it does not directly account for the change in dialysis time and age during a patient’s time on the waitlist that can lead to higher EPTS scores over time. To perform analyses on EPTS scores that change over time, it is possible to request an enhanced SAF from the SRTR that includes time-varying EPTS. Alternatively, you can consctruct a discrete time dataset that can be used to calculate EPTS at different periods during a candidate’s time on the waitlist. In this post we will address how we constructed such a dataset for our manuscript <em>Association of Race and Ethnicity with Priority for Deceased Donor Kidney Transplant.</em></p>
+<p>First, let’s take a look at our data:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 5%">
+<col style="width: 11%">
+<col style="width: 6%">
+<col style="width: 13%">
+<col style="width: 5%">
+<col style="width: 2%">
+<col style="width: 7%">
+<col style="width: 9%">
+<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">PX_ID</th>
+<th style="text-align: left;">min_list_date</th>
+<th style="text-align: left;">previous_TX</th>
+<th style="text-align: left;">dialysis</th>
+<th style="text-align: left;">waitlist_end_date</th>
+<th style="text-align: left;">wait_time</th>
+<th style="text-align: right;">dialysis_time_at_list</th>
+<th style="text-align: left;">diabetes</th>
+<th style="text-align: right;">age</th>
+<th style="text-align: left;">CAN_DIAL_DT</th>
+<th style="text-align: left;">last_wait_date</th>
+<th style="text-align: right;">age_months</th>
+<th style="text-align: left;">race</th>
+<th style="text-align: left;">age_group</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1031141</td>
+<td style="text-align: left;">2015-05-07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">2015-09-30</td>
+<td style="text-align: left;">146 days</td>
+<td style="text-align: right;">0.3390294</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: left;">2015-01-03</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">646</td>
+<td style="text-align: left;">Hispanic</td>
+<td style="text-align: left;">50-59</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1028738</td>
+<td style="text-align: left;">2015-04-23</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">2016-05-24</td>
+<td style="text-align: left;">397 days</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">310</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: left;">25-29</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1057463</td>
+<td style="text-align: left;">2015-10-20</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">2016-03-09</td>
+<td style="text-align: left;">141 days</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">600</td>
+<td style="text-align: left;">Black_AA</td>
+<td style="text-align: left;">50-59</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1094396</td>
+<td style="text-align: left;">2016-06-13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">2016-08-24</td>
+<td style="text-align: left;">72 days</td>
+<td style="text-align: right;">1.3752563</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: left;">2015-01-27</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">803</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: left;">60-69</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1037457</td>
+<td style="text-align: left;">2015-06-16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">2015-06-19</td>
+<td style="text-align: left;">3 days</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">800</td>
+<td style="text-align: left;">Hispanic</td>
+<td style="text-align: left;">60-69</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1071180</td>
+<td style="text-align: left;">2016-01-21</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">2016-12-07</td>
+<td style="text-align: left;">321 days</td>
+<td style="text-align: right;">0.6097061</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: left;">2015-06-12</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">638</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: left;">50-59</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1029986</td>
+<td style="text-align: left;">2015-04-30</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">2015-06-16</td>
+<td style="text-align: left;">47 days</td>
+<td style="text-align: right;">2.2392344</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: left;">2013-01-31</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">539</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: left;">40-49</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1031373</td>
+<td style="text-align: left;">2015-04-13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">249 days</td>
+<td style="text-align: right;">4.0273411</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: left;">2011-04-01</td>
+<td style="text-align: left;">2015-12-18</td>
+<td style="text-align: right;">661</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: left;">50-59</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1018433</td>
+<td style="text-align: left;">2015-02-19</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">2015-06-25</td>
+<td style="text-align: left;">126 days</td>
+<td style="text-align: right;">0.5003418</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: left;">2014-08-20</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">341</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: left;">25-29</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1028982</td>
+<td style="text-align: left;">2015-04-24</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">2015-04-29</td>
+<td style="text-align: left;">5 days</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">69</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">829</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: left;">60-69</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li><p><strong>PX_ID</strong> is a unique patient identifier</p></li>
+<li><p><strong>min_list_date</strong> is the earliest date a patient is listed for a transplant. This takes into account patients who are listed at multiple centers concurrently. We will explain how to address such patients in another post.</p></li>
+<li><p><strong>previous_TX</strong> is an indicator for whether the patient has received a previous transplant</p></li>
+<li><p><strong>dialysis</strong> is an indicator for whether the patient was on dialysis when they were listed</p></li>
+<li><p><strong>waitlist_end_date</strong> is the date that the patient received a transplant or was otherwise removed from the waiting list</p></li>
+<li><p><strong>wait_time</strong> is the time between the candidate’s listing and their waitlist end date</p></li>
+<li><p><strong>dialysis_time_at_list</strong> is how long the patient was on dialysis before being placed on the waitlist</p></li>
+<li><p><strong>diabetes</strong> is an indicator for whether the candidate has diabetes</p></li>
+<li><p><strong>age</strong> is the candidate’s age at listing</p></li>
+<li><p><strong>CAN_DIAL_DT</strong> is the date the candidate started dialysis (if at all)</p></li>
+<li><p><strong>last_wait_date</strong> is the latest date the patient is listed for transplant (for those patients who are listed at multiple centers)</p></li>
+<li><p><strong>age_months</strong> is the candidate’s age in months at listing</p></li>
+<li><p><strong>race</strong> is the patient’s race/ethnicity</p></li>
+<li><p><strong>age_group</strong> is the age group of the patient at listing</p></li>
+</ul>
+<p>With these variables we would be able to calculate a patient’s EPTS score at listing, but neither the age nor dialysis time variables capture changes over time. To address this, we can create a discrete time data set with 1 month intervals such that the age and dialysis time increase every month that the candidate is on the waitlist.</p>
+<p>First, we will flag patient’s who were pre-emptively listed and then started dialysis during their time on the waitlist:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>df_epts_varying<span class="sc">$</span>dialysis_during_waitlist <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(df_epts_varying<span class="sc">$</span>CAN_DIAL_DT <span class="sc">&gt;</span> df_epts_varying<span class="sc">$</span>min_list_date, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>df_epts_varying<span class="sc">$</span>dialysis_during_waitlist[<span class="fu">is.na</span>(df_epts_varying<span class="sc">$</span>dialysis_during_waitlist)] <span class="ot">&lt;-</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We will then consolidate the two wait time variables and calculate the total months that each patient was on the waitlist:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df_epts_varying<span class="sc">$</span>waitlist_end_date[<span class="fu">is.na</span>(df_epts_varying<span class="sc">$</span>waitlist_end_date)] <span class="ot">&lt;-</span> df_epts_varying<span class="sc">$</span>last_wait_date[<span class="fu">is.na</span>(df_epts_varying<span class="sc">$</span>waitlist_end_date)]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_epts_varying <span class="ot">=</span> df_epts_varying  <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">time_period =</span> <span class="fu">as.integer</span>(<span class="fu">floor</span>((wait_time)<span class="sc">*</span><span class="dv">12</span><span class="sc">/</span><span class="dv">365</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To properly encode the dialysis time for patients who begin dialysis after listing, we use a time_until_dialysis variable, which we will compare to the patient’s time on the waitlist to trigger the dialysis_time variable to start increasing</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df_epts_varying <span class="ot">=</span> df_epts_varying <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">time_until_dialysis =</span> <span class="fu">ifelse</span>(dialysis_during_waitlist <span class="sc">==</span> <span class="dv">1</span>, <span class="fu">as.integer</span>(<span class="fu">floor</span>((CAN_DIAL_DT <span class="sc">-</span> min_list_date)<span class="sc">*</span><span class="dv">12</span><span class="sc">/</span><span class="dv">365</span>)), <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Using the time period variable, we construct a dataset which has an observation for each month the patient is on the waitlist. This new dataset also uses the age in month at listing for the first observed age and then increases by 1 month for every new observation for that patient. Similarly, it increases dialysis time by 1 month for each observation for patients on dialysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>expanded_data <span class="ot">&lt;-</span> df_epts_varying <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">uncount</span>(<span class="at">weights =</span> time_period <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(PX_ID) <span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">time =</span> <span class="fu">ifelse</span>(<span class="fu">row_number</span>() <span class="sc">&lt;=</span> time_period <span class="sc">+</span> <span class="dv">1</span>, <span class="fu">row_number</span>() <span class="sc">-</span> <span class="dv">1</span>, <span class="cn">NA</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(time), <span class="fu">max</span>(time, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), time),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">age =</span> age_months<span class="sc">/</span><span class="dv">12</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age =</span> age <span class="sc">+</span> <span class="fu">row_number</span>()<span class="sc">/</span><span class="dv">12</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>expanded_data <span class="ot">=</span> expanded_data <span class="sc">%&gt;%</span> </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dialysis_after_waitlist =</span> <span class="fu">case_when</span>(</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    dialysis_during_waitlist <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> (time <span class="sc">-</span> time_until_dialysis) <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    dialysis_during_waitlist <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> (time <span class="sc">-</span> time_until_dialysis) <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">~</span> (time <span class="sc">-</span> time_until_dialysis), </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    dialysis_during_waitlist <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> dialysis <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> (time <span class="sc">-</span> time_until_dialysis),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span>))</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>expanded_data <span class="ot">=</span> expanded_data <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">dialysis_time =</span> dialysis_time_at_list <span class="sc">+</span> dialysis_after_waitlist<span class="sc">/</span><span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To calculate the EPTS score for each patient during each month on the waitlist, we prep the variables as follows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df_months <span class="ot">&lt;-</span> expanded_data <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PX_ID, age, dialysis, previous_TX, dialysis_time, diabetes, race, time) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age =</span> <span class="fu">as.numeric</span>(age),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">dialysis_time =</span> <span class="fu">as.numeric</span>(dialysis_time),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">diabetes =</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(diabetes)),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">dialysis =</span> <span class="fu">ifelse</span>(dialysis_time <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and then use the EPTS mapping table (from 2021):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_months <span class="ot">&lt;-</span> df_months <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">raw_epts =</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>           <span class="fl">0.047</span><span class="sc">*</span><span class="fu">pmax</span>(age <span class="sc">-</span> <span class="dv">25</span>, <span class="dv">0</span>) <span class="sc">-</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>           <span class="fl">0.015</span><span class="sc">*</span>(diabetes<span class="sc">==</span><span class="dv">1</span>)<span class="sc">*</span><span class="fu">pmax</span>(age <span class="sc">-</span> <span class="dv">25</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>           <span class="fl">0.398</span><span class="sc">*</span>(previous_TX<span class="sc">==</span><span class="dv">1</span>) <span class="sc">-</span> <span class="fl">0.237</span><span class="sc">*</span>(diabetes<span class="sc">==</span><span class="dv">1</span>)<span class="sc">*</span>(previous_TX<span class="sc">==</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>           <span class="fl">0.315</span><span class="sc">*</span><span class="fu">log</span>(dialysis_time <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">-</span> <span class="fl">0.099</span><span class="sc">*</span>(diabetes<span class="sc">==</span><span class="dv">1</span>)<span class="sc">*</span><span class="fu">log</span>(dialysis_time <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>           <span class="fl">0.130</span><span class="sc">*</span>(dialysis_time <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">-</span> <span class="fl">0.348</span><span class="sc">*</span>(diabetes<span class="sc">==</span><span class="dv">1</span>)<span class="sc">*</span>(dialysis_time <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">+</span>  </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>           <span class="fl">1.262</span><span class="sc">*</span>(diabetes<span class="sc">==</span><span class="dv">1</span>))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>df_months <span class="ot">&lt;-</span> df_months <span class="sc">%&gt;%</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentile_epts =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.01842385502984</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.23587063655031</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.41885215605749</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.52800000000000</span> <span class="sc">~</span> <span class="dv">3</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.62852561015766</span> <span class="sc">~</span> <span class="dv">4</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.71352703627652</span> <span class="sc">~</span> <span class="dv">5</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.79220296573099</span> <span class="sc">~</span> <span class="dv">6</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.86714433496842</span> <span class="sc">~</span> <span class="dv">7</span>,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.93047980835044</span> <span class="sc">~</span> <span class="dv">8</span>,</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.99391854893908</span> <span class="sc">~</span> <span class="dv">9</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.05598976270380</span> <span class="sc">~</span> <span class="dv">10</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.11434794060852</span> <span class="sc">~</span> <span class="dv">11</span>,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.17045574165807</span> <span class="sc">~</span> <span class="dv">12</span>,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.22030049020253</span> <span class="sc">~</span> <span class="dv">13</span>,</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.27212500074301</span> <span class="sc">~</span> <span class="dv">14</span>,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.31913766912690</span> <span class="sc">~</span> <span class="dv">15</span>,</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.36438535249829</span> <span class="sc">~</span> <span class="dv">16</span>,</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.41168240930869</span> <span class="sc">~</span> <span class="dv">17</span>,</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.45433196440794</span> <span class="sc">~</span> <span class="dv">18</span>,</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.49473716632444</span> <span class="sc">~</span> <span class="dv">19</span>,</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.53514236824093</span> <span class="sc">~</span> <span class="dv">20</span>,</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.57300507228037</span> <span class="sc">~</span> <span class="dv">21</span>,</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.60810335386721</span> <span class="sc">~</span> <span class="dv">22</span>,</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.64297604380561</span> <span class="sc">~</span> <span class="dv">23</span>,</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.67354110859117</span> <span class="sc">~</span> <span class="dv">24</span>,</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.70255373032170</span> <span class="sc">~</span> <span class="dv">25</span>,</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.73150650239562</span> <span class="sc">~</span> <span class="dv">26</span>,</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.75869376757638</span> <span class="sc">~</span> <span class="dv">27</span>,</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.78477960301164</span> <span class="sc">~</span> <span class="dv">28</span>,</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.81180219028063</span> <span class="sc">~</span> <span class="dv">29</span>,</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.83683495289066</span> <span class="sc">~</span> <span class="dv">30</span>,</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.86060232717317</span> <span class="sc">~</span> <span class="dv">31</span>,</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.88375164234518</span> <span class="sc">~</span> <span class="dv">32</span>,</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.90727234572108</span> <span class="sc">~</span> <span class="dv">33</span>,</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.92941067761807</span> <span class="sc">~</span> <span class="dv">34</span>,</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.95149964313427</span> <span class="sc">~</span> <span class="dv">35</span>,</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.97370841889117</span> <span class="sc">~</span> <span class="dv">36</span>,</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.99414162335253</span> <span class="sc">~</span> <span class="dv">37</span>,</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.01486542476192</span> <span class="sc">~</span> <span class="dv">38</span>,</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.03323308735222</span> <span class="sc">~</span> <span class="dv">39</span>,</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.05397604380561</span> <span class="sc">~</span> <span class="dv">40</span>,</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.07327619854998</span> <span class="sc">~</span> <span class="dv">41</span>,</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.09202182261888</span> <span class="sc">~</span> <span class="dv">42</span>,</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.11055715263518</span> <span class="sc">~</span> <span class="dv">43</span>,</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.12710952613370</span> <span class="sc">~</span> <span class="dv">44</span>,</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.14469472963723</span> <span class="sc">~</span> <span class="dv">45</span>,</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.16206639288159</span> <span class="sc">~</span> <span class="dv">46</span>,</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.17895804742641</span> <span class="sc">~</span> <span class="dv">47</span>,</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.19533620671360</span> <span class="sc">~</span> <span class="dv">48</span>,</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.21202975619422</span> <span class="sc">~</span> <span class="dv">49</span>,</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.22830663928816</span> <span class="sc">~</span> <span class="dv">50</span>,</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.24486516084873</span> <span class="sc">~</span> <span class="dv">51</span>,</span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.25934770704997</span> <span class="sc">~</span> <span class="dv">52</span>,</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.27457912196537</span> <span class="sc">~</span> <span class="dv">53</span>,</span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.29007370896616</span> <span class="sc">~</span> <span class="dv">54</span>,</span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.30555527524319</span> <span class="sc">~</span> <span class="dv">55</span>,</span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.32162833675565</span> <span class="sc">~</span> <span class="dv">56</span>,</span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.33676297950084</span> <span class="sc">~</span> <span class="dv">57</span>,</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.35264238040105</span> <span class="sc">~</span> <span class="dv">58</span>,</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.36804654346338</span> <span class="sc">~</span> <span class="dv">59</span>,</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.38288012607080</span> <span class="sc">~</span> <span class="dv">60</span>,</span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.39744314980323</span> <span class="sc">~</span> <span class="dv">61</span>,</span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.41176454483231</span> <span class="sc">~</span> <span class="dv">62</span>,</span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.42661080994812</span> <span class="sc">~</span> <span class="dv">63</span>,</span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.44143904753026</span> <span class="sc">~</span> <span class="dv">64</span>,</span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.45616599664439</span> <span class="sc">~</span> <span class="dv">65</span>,</span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.47046406570842</span> <span class="sc">~</span> <span class="dv">66</span>,</span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.48541673804140</span> <span class="sc">~</span> <span class="dv">67</span>,</span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.50082593655723</span> <span class="sc">~</span> <span class="dv">68</span>,</span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.51575906913073</span> <span class="sc">~</span> <span class="dv">69</span>,</span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.53179041411307</span> <span class="sc">~</span> <span class="dv">70</span>,</span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.54847145496397</span> <span class="sc">~</span> <span class="dv">71</span>,</span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.56450211494358</span> <span class="sc">~</span> <span class="dv">72</span>,</span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.58056343072585</span> <span class="sc">~</span> <span class="dv">73</span>,</span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.59622536132146</span> <span class="sc">~</span> <span class="dv">74</span>,</span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.61220575225961</span> <span class="sc">~</span> <span class="dv">75</span>,</span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.62980229727812</span> <span class="sc">~</span> <span class="dv">76</span>,</span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.64633742797854</span> <span class="sc">~</span> <span class="dv">77</span>,</span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.66270836678796</span> <span class="sc">~</span> <span class="dv">78</span>,</span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.68071428443369</span> <span class="sc">~</span> <span class="dv">79</span>,</span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.69965721597721</span> <span class="sc">~</span> <span class="dv">80</span>,</span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.71924640657084</span> <span class="sc">~</span> <span class="dv">81</span>,</span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.73853621699103</span> <span class="sc">~</span> <span class="dv">82</span>,</span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.75778147760295</span> <span class="sc">~</span> <span class="dv">83</span>,</span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.77728756159785</span> <span class="sc">~</span> <span class="dv">84</span>,</span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.79719224080293</span> <span class="sc">~</span> <span class="dv">85</span>,</span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.81884538728167</span> <span class="sc">~</span> <span class="dv">86</span>,</span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.83956718767238</span> <span class="sc">~</span> <span class="dv">87</span>,</span>
+<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.86117343797221</span> <span class="sc">~</span> <span class="dv">88</span>,</span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.88458357309819</span> <span class="sc">~</span> <span class="dv">89</span>,</span>
+<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.90679669457193</span> <span class="sc">~</span> <span class="dv">90</span>,</span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.93187604974332</span> <span class="sc">~</span> <span class="dv">91</span>,</span>
+<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.95563732458239</span> <span class="sc">~</span> <span class="dv">92</span>,</span>
+<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.98192663471240</span> <span class="sc">~</span> <span class="dv">93</span>,</span>
+<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.01041956645050</span> <span class="sc">~</span> <span class="dv">94</span>,</span>
+<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.04211557588171</span> <span class="sc">~</span> <span class="dv">95</span>,</span>
+<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.07653689699372</span> <span class="sc">~</span> <span class="dv">96</span>,</span>
+<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.11838513945413</span> <span class="sc">~</span> <span class="dv">97</span>,</span>
+<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.17159971150431</span> <span class="sc">~</span> <span class="dv">98</span>,</span>
+<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.24849418211424</span> <span class="sc">~</span> <span class="dv">99</span>,</span>
+<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>           <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">100</span>)) </span>
+<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a><span class="do">## Extra line to remove missings</span></span>
+<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a>df_months<span class="sc">$</span>percentile_epts[<span class="fu">is.na</span>(df_months<span class="sc">$</span>raw_epts)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As you can see below, this process results in a dataset that captures changes in age and dialysis time, allowing for the calculation of EPTS scores over a patient’s time on the waitlist.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 4%">
+<col style="width: 9%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">PX_ID</th>
+<th style="text-align: right;">age</th>
+<th style="text-align: right;">dialysis</th>
+<th style="text-align: left;">previous_TX</th>
+<th style="text-align: right;">dialysis_time</th>
+<th style="text-align: right;">diabetes</th>
+<th style="text-align: left;">race</th>
+<th style="text-align: right;">time</th>
+<th style="text-align: right;">raw_epts</th>
+<th style="text-align: right;">percentile_epts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1031141</td>
+<td style="text-align: right;">53.91667</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.3390294</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Hispanic</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2.2503935</td>
+<td style="text-align: right;">52</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1031141</td>
+<td style="text-align: right;">54.00000</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.4223627</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Hispanic</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.2661010</td>
+<td style="text-align: right;">53</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1031141</td>
+<td style="text-align: right;">54.08333</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.5056961</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Hispanic</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2.2810658</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1031141</td>
+<td style="text-align: right;">54.16667</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.5890294</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Hispanic</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2.2953680</td>
+<td style="text-align: right;">55</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1031141</td>
+<td style="text-align: right;">54.25000</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.6723627</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Hispanic</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2.3090753</td>
+<td style="text-align: right;">56</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1028738</td>
+<td style="text-align: right;">25.91667</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.5710833</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1028738</td>
+<td style="text-align: right;">26.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.5750000</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1028738</td>
+<td style="text-align: right;">26.08333</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.5789167</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1028738</td>
+<td style="text-align: right;">26.16667</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.5828333</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1028738</td>
+<td style="text-align: right;">26.25000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">White</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.5867500</td>
+<td style="text-align: right;">4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

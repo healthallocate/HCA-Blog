@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/time_varying_epts.html",
       "/posts/prop_score.html"
     ]
   }
