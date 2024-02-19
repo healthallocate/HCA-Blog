@@ -6,6 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Molly White">
+<meta name="dcterms.date" content="2024-02-19">
 
 <title>HCA Blog - Time Varying EPTS</title>
 <style>
@@ -134,13 +136,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Time Varying EPTS</h1>
-</div>
+  <div class="quarto-categories">
+    <div class="quarto-category">Data Structures</div>
+    <div class="quarto-category">Kidney Allocation</div>
+    <div class="quarto-category">R</div>
+  </div>
+  </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Molly White </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 19, 2024</p>
+    </div>
+  </div>
   
     
   </div>
@@ -554,156 +573,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>As you can see below, this process results in a dataset that captures changes in age and dialysis time, allowing for the calculation of EPTS scores over a patient’s time on the waitlist.</p>
 <div class="cell">
 <div class="cell-output-display">
-<table class="table table-sm table-striped small">
-<colgroup>
-<col style="width: 7%">
-<col style="width: 8%">
-<col style="width: 8%">
-<col style="width: 11%">
-<col style="width: 13%">
-<col style="width: 8%">
-<col style="width: 8%">
-<col style="width: 4%">
-<col style="width: 9%">
-<col style="width: 15%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: right;">PX_ID</th>
-<th style="text-align: right;">age</th>
-<th style="text-align: right;">dialysis</th>
-<th style="text-align: left;">previous_TX</th>
-<th style="text-align: right;">dialysis_time</th>
-<th style="text-align: right;">diabetes</th>
-<th style="text-align: left;">race</th>
-<th style="text-align: right;">time</th>
-<th style="text-align: right;">raw_epts</th>
-<th style="text-align: right;">percentile_epts</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">1031141</td>
-<td style="text-align: right;">53.91667</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">0.3390294</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">Hispanic</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">2.2503935</td>
-<td style="text-align: right;">52</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1031141</td>
-<td style="text-align: right;">54.00000</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">0.4223627</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">Hispanic</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">2.2661010</td>
-<td style="text-align: right;">53</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1031141</td>
-<td style="text-align: right;">54.08333</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">0.5056961</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">Hispanic</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">2.2810658</td>
-<td style="text-align: right;">54</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1031141</td>
-<td style="text-align: right;">54.16667</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">0.5890294</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">Hispanic</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">2.2953680</td>
-<td style="text-align: right;">55</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1031141</td>
-<td style="text-align: right;">54.25000</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">0.6723627</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">Hispanic</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">2.3090753</td>
-<td style="text-align: right;">56</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1028738</td>
-<td style="text-align: right;">25.91667</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">0.0000000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.5710833</td>
-<td style="text-align: right;">4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1028738</td>
-<td style="text-align: right;">26.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">0.0000000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0.5750000</td>
-<td style="text-align: right;">4</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1028738</td>
-<td style="text-align: right;">26.08333</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">0.0000000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">0.5789167</td>
-<td style="text-align: right;">4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1028738</td>
-<td style="text-align: right;">26.16667</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">0.0000000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0.5828333</td>
-<td style="text-align: right;">4</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1028738</td>
-<td style="text-align: right;">26.25000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">0.0000000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0.5867500</td>
-<td style="text-align: right;">4</td>
-</tr>
-</tbody>
-</table>
+<div>
+<figure class="figure">
+<p><img src="time_varying_epts_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
