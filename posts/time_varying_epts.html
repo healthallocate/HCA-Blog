@@ -170,204 +170,108 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>In the SRTR Standard Analysis Files, the CAND_KIPA file includes information on candidates listed for kidney and/or pancreas transplants. From this file, it is possible to calculate a candidate EPTS score at listing, but it does not directly account for the change in dialysis time and age during a patient’s time on the waitlist that can lead to higher EPTS scores over time. To perform analyses on EPTS scores that change over time, it is possible to request an enhanced SAF from the SRTR that includes time-varying EPTS. Alternatively, you can consctruct a discrete time dataset that can be used to calculate EPTS at different periods during a candidate’s time on the waitlist. In this post we will address how we constructed such a dataset for our manuscript <em>Association of Race and Ethnicity with Priority for Deceased Donor Kidney Transplant.</em></p>
-<p>First, let’s take a look at our data:</p>
+<p>For this post, we use fabricated data to demonstrate the process of constructing such a dataset. Let’s take a look at our data:</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <colgroup>
 <col style="width: 4%">
-<col style="width: 8%">
-<col style="width: 7%">
-<col style="width: 5%">
 <col style="width: 11%">
-<col style="width: 6%">
-<col style="width: 13%">
-<col style="width: 5%">
-<col style="width: 2%">
-<col style="width: 7%">
 <col style="width: 9%">
-<col style="width: 6%">
-<col style="width: 5%">
-<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 14%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 17%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: right;">PX_ID</th>
+<th style="text-align: left;">PX_ID</th>
 <th style="text-align: left;">min_list_date</th>
-<th style="text-align: left;">previous_TX</th>
-<th style="text-align: left;">dialysis</th>
+<th style="text-align: right;">previous_TX</th>
+<th style="text-align: right;">dialysis</th>
 <th style="text-align: left;">waitlist_end_date</th>
-<th style="text-align: left;">wait_time</th>
-<th style="text-align: right;">dialysis_time_at_list</th>
-<th style="text-align: left;">diabetes</th>
-<th style="text-align: right;">age</th>
-<th style="text-align: left;">CAN_DIAL_DT</th>
-<th style="text-align: left;">last_wait_date</th>
+<th style="text-align: right;">diabetes</th>
 <th style="text-align: right;">age_months</th>
-<th style="text-align: left;">race</th>
-<th style="text-align: left;">age_group</th>
+<th style="text-align: left;">CAN_DIAL_DT</th>
+<th style="text-align: right;">dialysis_time_at_list</th>
+<th style="text-align: left;">wait_time</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">1031141</td>
-<td style="text-align: left;">2015-05-07</td>
-<td style="text-align: left;">0</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">2015-09-30</td>
-<td style="text-align: left;">146 days</td>
-<td style="text-align: right;">0.3390294</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">53</td>
-<td style="text-align: left;">2015-01-03</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">646</td>
-<td style="text-align: left;">Hispanic</td>
-<td style="text-align: left;">50-59</td>
+<td style="text-align: left;">2015-09-03</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">2016-02-09</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">602</td>
+<td style="text-align: left;">2015-11-15</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">159 days</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">1028738</td>
-<td style="text-align: left;">2015-04-23</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">2016-05-24</td>
-<td style="text-align: left;">397 days</td>
-<td style="text-align: right;">0.0000000</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">25</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">310</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: left;">25-29</td>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">2012-02-03</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">2012-04-16</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">439</td>
+<td style="text-align: left;">2011-09-20</td>
+<td style="text-align: right;">0.2000000</td>
+<td style="text-align: left;">73 days</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">1057463</td>
-<td style="text-align: left;">2015-10-20</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">2016-03-09</td>
-<td style="text-align: left;">141 days</td>
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">2014-04-30</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">2014-12-20</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">339</td>
+<td style="text-align: left;">NA</td>
 <td style="text-align: right;">0.0000000</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">50</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">600</td>
-<td style="text-align: left;">Black_AA</td>
-<td style="text-align: left;">50-59</td>
+<td style="text-align: left;">234 days</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">1094396</td>
-<td style="text-align: left;">2016-06-13</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">2016-08-24</td>
-<td style="text-align: left;">72 days</td>
-<td style="text-align: right;">1.3752563</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">66</td>
-<td style="text-align: left;">2015-01-27</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">803</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: left;">60-69</td>
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">2012-05-12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">2012-06-29</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">629</td>
+<td style="text-align: left;">2012-01-02</td>
+<td style="text-align: right;">0.1315068</td>
+<td style="text-align: left;">48 days</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">1037457</td>
-<td style="text-align: left;">2015-06-16</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">2015-06-19</td>
-<td style="text-align: left;">3 days</td>
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">2011-02-21</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">2011-09-04</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">546</td>
+<td style="text-align: left;">NA</td>
 <td style="text-align: right;">0.0000000</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">66</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">800</td>
-<td style="text-align: left;">Hispanic</td>
-<td style="text-align: left;">60-69</td>
+<td style="text-align: left;">195 days</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">1071180</td>
-<td style="text-align: left;">2016-01-21</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">2016-12-07</td>
-<td style="text-align: left;">321 days</td>
-<td style="text-align: right;">0.6097061</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">53</td>
-<td style="text-align: left;">2015-06-12</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">638</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: left;">50-59</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1029986</td>
-<td style="text-align: left;">2015-04-30</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">2015-06-16</td>
-<td style="text-align: left;">47 days</td>
-<td style="text-align: right;">2.2392344</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">44</td>
-<td style="text-align: left;">2013-01-31</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">539</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: left;">40-49</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1031373</td>
-<td style="text-align: left;">2015-04-13</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">249 days</td>
-<td style="text-align: right;">4.0273411</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">55</td>
-<td style="text-align: left;">2011-04-01</td>
-<td style="text-align: left;">2015-12-18</td>
-<td style="text-align: right;">661</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: left;">50-59</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1018433</td>
-<td style="text-align: left;">2015-02-19</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">2015-06-25</td>
-<td style="text-align: left;">126 days</td>
-<td style="text-align: right;">0.5003418</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: right;">28</td>
-<td style="text-align: left;">2014-08-20</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">341</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: left;">25-29</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1028982</td>
-<td style="text-align: left;">2015-04-24</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">2015-04-29</td>
-<td style="text-align: left;">5 days</td>
-<td style="text-align: right;">0.0000000</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">69</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">829</td>
-<td style="text-align: left;">White</td>
-<td style="text-align: left;">60-69</td>
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">2012-12-11</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">2013-04-22</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">528</td>
+<td style="text-align: left;">2011-11-12</td>
+<td style="text-align: right;">0.3616438</td>
+<td style="text-align: left;">132 days</td>
 </tr>
 </tbody>
 </table>
@@ -382,12 +286,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p><strong>wait_time</strong> is the time between the candidate’s listing and their waitlist end date</p></li>
 <li><p><strong>dialysis_time_at_list</strong> is how long the patient was on dialysis before being placed on the waitlist</p></li>
 <li><p><strong>diabetes</strong> is an indicator for whether the candidate has diabetes</p></li>
-<li><p><strong>age</strong> is the candidate’s age at listing</p></li>
 <li><p><strong>CAN_DIAL_DT</strong> is the date the candidate started dialysis (if at all)</p></li>
-<li><p><strong>last_wait_date</strong> is the latest date the patient is listed for transplant (for those patients who are listed at multiple centers)</p></li>
 <li><p><strong>age_months</strong> is the candidate’s age in months at listing</p></li>
-<li><p><strong>race</strong> is the patient’s race/ethnicity</p></li>
-<li><p><strong>age_group</strong> is the age group of the patient at listing</p></li>
 </ul>
 <p>With these variables we would be able to calculate a patient’s EPTS score at listing, but neither the age nor dialysis time variables capture changes over time. To address this, we can create a discrete time data set with 1 month intervals such that the age and dialysis time increase every month that the candidate is on the waitlist.</p>
 <p>First, we will flag patient’s who were pre-emptively listed and then started dialysis during their time on the waitlist:</p>
@@ -395,10 +295,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>df_epts_varying<span class="sc">$</span>dialysis_during_waitlist <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(df_epts_varying<span class="sc">$</span>CAN_DIAL_DT <span class="sc">&gt;</span> df_epts_varying<span class="sc">$</span>min_list_date, <span class="dv">1</span>, <span class="dv">0</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>df_epts_varying<span class="sc">$</span>dialysis_during_waitlist[<span class="fu">is.na</span>(df_epts_varying<span class="sc">$</span>dialysis_during_waitlist)] <span class="ot">&lt;-</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>We will then consolidate the two wait time variables and calculate the total months that each patient was on the waitlist:</p>
+<p>We will then calculate the total months that each patient was on the waitlist:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df_epts_varying<span class="sc">$</span>waitlist_end_date[<span class="fu">is.na</span>(df_epts_varying<span class="sc">$</span>waitlist_end_date)] <span class="ot">&lt;-</span> df_epts_varying<span class="sc">$</span>last_wait_date[<span class="fu">is.na</span>(df_epts_varying<span class="sc">$</span>waitlist_end_date)]</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_epts_varying <span class="ot">=</span> df_epts_varying  <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">time_period =</span> <span class="fu">as.integer</span>(<span class="fu">floor</span>((wait_time)<span class="sc">*</span><span class="dv">12</span><span class="sc">/</span><span class="dv">365</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df_epts_varying <span class="ot">=</span> df_epts_varying  <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">time_period =</span> <span class="fu">as.integer</span>(<span class="fu">floor</span>((wait_time)<span class="sc">*</span><span class="dv">12</span><span class="sc">/</span><span class="dv">365</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>To properly encode the dialysis time for patients who begin dialysis after listing, we use a time_until_dialysis variable, which we will compare to the patient’s time on the waitlist to trigger the dialysis_time variable to start increasing</p>
 <div class="cell">
@@ -427,7 +326,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>To calculate the EPTS score for each patient during each month on the waitlist, we prep the variables as follows:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df_months <span class="ot">&lt;-</span> expanded_data <span class="sc">%&gt;%</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PX_ID, age, dialysis, previous_TX, dialysis_time, diabetes, race, time) <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PX_ID, age, dialysis, previous_TX, dialysis_time, diabetes, time) <span class="sc">%&gt;%</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age =</span> <span class="fu">as.numeric</span>(age),</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">dialysis_time =</span> <span class="fu">as.numeric</span>(dialysis_time),</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">diabetes =</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(diabetes)),</span>
@@ -444,133 +343,134 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>           <span class="fl">0.130</span><span class="sc">*</span>(dialysis_time <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">-</span> <span class="fl">0.348</span><span class="sc">*</span>(diabetes<span class="sc">==</span><span class="dv">1</span>)<span class="sc">*</span>(dialysis_time <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">+</span>  </span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>           <span class="fl">1.262</span><span class="sc">*</span>(diabetes<span class="sc">==</span><span class="dv">1</span>))</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>df_months <span class="ot">&lt;-</span> df_months <span class="sc">%&gt;%</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentile_epts =</span> <span class="fu">case_when</span>(</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.01842385502984</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.23587063655031</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.41885215605749</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.52800000000000</span> <span class="sc">~</span> <span class="dv">3</span>,</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.62852561015766</span> <span class="sc">~</span> <span class="dv">4</span>,</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.71352703627652</span> <span class="sc">~</span> <span class="dv">5</span>,</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.79220296573099</span> <span class="sc">~</span> <span class="dv">6</span>,</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.86714433496842</span> <span class="sc">~</span> <span class="dv">7</span>,</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.93047980835044</span> <span class="sc">~</span> <span class="dv">8</span>,</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.99391854893908</span> <span class="sc">~</span> <span class="dv">9</span>,</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.05598976270380</span> <span class="sc">~</span> <span class="dv">10</span>,</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.11434794060852</span> <span class="sc">~</span> <span class="dv">11</span>,</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.17045574165807</span> <span class="sc">~</span> <span class="dv">12</span>,</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.22030049020253</span> <span class="sc">~</span> <span class="dv">13</span>,</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.27212500074301</span> <span class="sc">~</span> <span class="dv">14</span>,</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.31913766912690</span> <span class="sc">~</span> <span class="dv">15</span>,</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.36438535249829</span> <span class="sc">~</span> <span class="dv">16</span>,</span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.41168240930869</span> <span class="sc">~</span> <span class="dv">17</span>,</span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.45433196440794</span> <span class="sc">~</span> <span class="dv">18</span>,</span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.49473716632444</span> <span class="sc">~</span> <span class="dv">19</span>,</span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.53514236824093</span> <span class="sc">~</span> <span class="dv">20</span>,</span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.57300507228037</span> <span class="sc">~</span> <span class="dv">21</span>,</span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.60810335386721</span> <span class="sc">~</span> <span class="dv">22</span>,</span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.64297604380561</span> <span class="sc">~</span> <span class="dv">23</span>,</span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.67354110859117</span> <span class="sc">~</span> <span class="dv">24</span>,</span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.70255373032170</span> <span class="sc">~</span> <span class="dv">25</span>,</span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.73150650239562</span> <span class="sc">~</span> <span class="dv">26</span>,</span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.75869376757638</span> <span class="sc">~</span> <span class="dv">27</span>,</span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.78477960301164</span> <span class="sc">~</span> <span class="dv">28</span>,</span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.81180219028063</span> <span class="sc">~</span> <span class="dv">29</span>,</span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.83683495289066</span> <span class="sc">~</span> <span class="dv">30</span>,</span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.86060232717317</span> <span class="sc">~</span> <span class="dv">31</span>,</span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.88375164234518</span> <span class="sc">~</span> <span class="dv">32</span>,</span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.90727234572108</span> <span class="sc">~</span> <span class="dv">33</span>,</span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.92941067761807</span> <span class="sc">~</span> <span class="dv">34</span>,</span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.95149964313427</span> <span class="sc">~</span> <span class="dv">35</span>,</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.97370841889117</span> <span class="sc">~</span> <span class="dv">36</span>,</span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.99414162335253</span> <span class="sc">~</span> <span class="dv">37</span>,</span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.01486542476192</span> <span class="sc">~</span> <span class="dv">38</span>,</span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.03323308735222</span> <span class="sc">~</span> <span class="dv">39</span>,</span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.05397604380561</span> <span class="sc">~</span> <span class="dv">40</span>,</span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.07327619854998</span> <span class="sc">~</span> <span class="dv">41</span>,</span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.09202182261888</span> <span class="sc">~</span> <span class="dv">42</span>,</span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.11055715263518</span> <span class="sc">~</span> <span class="dv">43</span>,</span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.12710952613370</span> <span class="sc">~</span> <span class="dv">44</span>,</span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.14469472963723</span> <span class="sc">~</span> <span class="dv">45</span>,</span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.16206639288159</span> <span class="sc">~</span> <span class="dv">46</span>,</span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.17895804742641</span> <span class="sc">~</span> <span class="dv">47</span>,</span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.19533620671360</span> <span class="sc">~</span> <span class="dv">48</span>,</span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.21202975619422</span> <span class="sc">~</span> <span class="dv">49</span>,</span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.22830663928816</span> <span class="sc">~</span> <span class="dv">50</span>,</span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.24486516084873</span> <span class="sc">~</span> <span class="dv">51</span>,</span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.25934770704997</span> <span class="sc">~</span> <span class="dv">52</span>,</span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.27457912196537</span> <span class="sc">~</span> <span class="dv">53</span>,</span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.29007370896616</span> <span class="sc">~</span> <span class="dv">54</span>,</span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.30555527524319</span> <span class="sc">~</span> <span class="dv">55</span>,</span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.32162833675565</span> <span class="sc">~</span> <span class="dv">56</span>,</span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.33676297950084</span> <span class="sc">~</span> <span class="dv">57</span>,</span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.35264238040105</span> <span class="sc">~</span> <span class="dv">58</span>,</span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.36804654346338</span> <span class="sc">~</span> <span class="dv">59</span>,</span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.38288012607080</span> <span class="sc">~</span> <span class="dv">60</span>,</span>
-<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.39744314980323</span> <span class="sc">~</span> <span class="dv">61</span>,</span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.41176454483231</span> <span class="sc">~</span> <span class="dv">62</span>,</span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.42661080994812</span> <span class="sc">~</span> <span class="dv">63</span>,</span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.44143904753026</span> <span class="sc">~</span> <span class="dv">64</span>,</span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.45616599664439</span> <span class="sc">~</span> <span class="dv">65</span>,</span>
-<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.47046406570842</span> <span class="sc">~</span> <span class="dv">66</span>,</span>
-<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.48541673804140</span> <span class="sc">~</span> <span class="dv">67</span>,</span>
-<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.50082593655723</span> <span class="sc">~</span> <span class="dv">68</span>,</span>
-<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.51575906913073</span> <span class="sc">~</span> <span class="dv">69</span>,</span>
-<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.53179041411307</span> <span class="sc">~</span> <span class="dv">70</span>,</span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.54847145496397</span> <span class="sc">~</span> <span class="dv">71</span>,</span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.56450211494358</span> <span class="sc">~</span> <span class="dv">72</span>,</span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.58056343072585</span> <span class="sc">~</span> <span class="dv">73</span>,</span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.59622536132146</span> <span class="sc">~</span> <span class="dv">74</span>,</span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.61220575225961</span> <span class="sc">~</span> <span class="dv">75</span>,</span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.62980229727812</span> <span class="sc">~</span> <span class="dv">76</span>,</span>
-<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.64633742797854</span> <span class="sc">~</span> <span class="dv">77</span>,</span>
-<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.66270836678796</span> <span class="sc">~</span> <span class="dv">78</span>,</span>
-<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.68071428443369</span> <span class="sc">~</span> <span class="dv">79</span>,</span>
-<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.69965721597721</span> <span class="sc">~</span> <span class="dv">80</span>,</span>
-<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.71924640657084</span> <span class="sc">~</span> <span class="dv">81</span>,</span>
-<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.73853621699103</span> <span class="sc">~</span> <span class="dv">82</span>,</span>
-<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.75778147760295</span> <span class="sc">~</span> <span class="dv">83</span>,</span>
-<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.77728756159785</span> <span class="sc">~</span> <span class="dv">84</span>,</span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.79719224080293</span> <span class="sc">~</span> <span class="dv">85</span>,</span>
-<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.81884538728167</span> <span class="sc">~</span> <span class="dv">86</span>,</span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.83956718767238</span> <span class="sc">~</span> <span class="dv">87</span>,</span>
-<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.86117343797221</span> <span class="sc">~</span> <span class="dv">88</span>,</span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.88458357309819</span> <span class="sc">~</span> <span class="dv">89</span>,</span>
-<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.90679669457193</span> <span class="sc">~</span> <span class="dv">90</span>,</span>
-<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.93187604974332</span> <span class="sc">~</span> <span class="dv">91</span>,</span>
-<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.95563732458239</span> <span class="sc">~</span> <span class="dv">92</span>,</span>
-<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.98192663471240</span> <span class="sc">~</span> <span class="dv">93</span>,</span>
-<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.01041956645050</span> <span class="sc">~</span> <span class="dv">94</span>,</span>
-<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>           </span>
-<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.04211557588171</span> <span class="sc">~</span> <span class="dv">95</span>,</span>
-<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.07653689699372</span> <span class="sc">~</span> <span class="dv">96</span>,</span>
-<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.11838513945413</span> <span class="sc">~</span> <span class="dv">97</span>,</span>
-<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.17159971150431</span> <span class="sc">~</span> <span class="dv">98</span>,</span>
-<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.24849418211424</span> <span class="sc">~</span> <span class="dv">99</span>,</span>
-<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>           <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">100</span>)) </span>
-<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a><span class="do">## Extra line to remove missings</span></span>
-<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a>df_months<span class="sc">$</span>percentile_epts[<span class="fu">is.na</span>(df_months<span class="sc">$</span>raw_epts)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>df_months <span class="ot">&lt;-</span> df_months <span class="sc">%&gt;%</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentile_epts =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.01842385502984</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.23587063655031</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.41885215605749</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.52800000000000</span> <span class="sc">~</span> <span class="dv">3</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.62852561015766</span> <span class="sc">~</span> <span class="dv">4</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.71352703627652</span> <span class="sc">~</span> <span class="dv">5</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.79220296573099</span> <span class="sc">~</span> <span class="dv">6</span>,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.86714433496842</span> <span class="sc">~</span> <span class="dv">7</span>,</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.93047980835044</span> <span class="sc">~</span> <span class="dv">8</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">0.99391854893908</span> <span class="sc">~</span> <span class="dv">9</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.05598976270380</span> <span class="sc">~</span> <span class="dv">10</span>,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.11434794060852</span> <span class="sc">~</span> <span class="dv">11</span>,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.17045574165807</span> <span class="sc">~</span> <span class="dv">12</span>,</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.22030049020253</span> <span class="sc">~</span> <span class="dv">13</span>,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.27212500074301</span> <span class="sc">~</span> <span class="dv">14</span>,</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.31913766912690</span> <span class="sc">~</span> <span class="dv">15</span>,</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.36438535249829</span> <span class="sc">~</span> <span class="dv">16</span>,</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.41168240930869</span> <span class="sc">~</span> <span class="dv">17</span>,</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.45433196440794</span> <span class="sc">~</span> <span class="dv">18</span>,</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.49473716632444</span> <span class="sc">~</span> <span class="dv">19</span>,</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.53514236824093</span> <span class="sc">~</span> <span class="dv">20</span>,</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.57300507228037</span> <span class="sc">~</span> <span class="dv">21</span>,</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.60810335386721</span> <span class="sc">~</span> <span class="dv">22</span>,</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.64297604380561</span> <span class="sc">~</span> <span class="dv">23</span>,</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.67354110859117</span> <span class="sc">~</span> <span class="dv">24</span>,</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.70255373032170</span> <span class="sc">~</span> <span class="dv">25</span>,</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.73150650239562</span> <span class="sc">~</span> <span class="dv">26</span>,</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.75869376757638</span> <span class="sc">~</span> <span class="dv">27</span>,</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.78477960301164</span> <span class="sc">~</span> <span class="dv">28</span>,</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.81180219028063</span> <span class="sc">~</span> <span class="dv">29</span>,</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.83683495289066</span> <span class="sc">~</span> <span class="dv">30</span>,</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.86060232717317</span> <span class="sc">~</span> <span class="dv">31</span>,</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.88375164234518</span> <span class="sc">~</span> <span class="dv">32</span>,</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.90727234572108</span> <span class="sc">~</span> <span class="dv">33</span>,</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.92941067761807</span> <span class="sc">~</span> <span class="dv">34</span>,</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.95149964313427</span> <span class="sc">~</span> <span class="dv">35</span>,</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.97370841889117</span> <span class="sc">~</span> <span class="dv">36</span>,</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">1.99414162335253</span> <span class="sc">~</span> <span class="dv">37</span>,</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.01486542476192</span> <span class="sc">~</span> <span class="dv">38</span>,</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.03323308735222</span> <span class="sc">~</span> <span class="dv">39</span>,</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.05397604380561</span> <span class="sc">~</span> <span class="dv">40</span>,</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.07327619854998</span> <span class="sc">~</span> <span class="dv">41</span>,</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.09202182261888</span> <span class="sc">~</span> <span class="dv">42</span>,</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.11055715263518</span> <span class="sc">~</span> <span class="dv">43</span>,</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.12710952613370</span> <span class="sc">~</span> <span class="dv">44</span>,</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.14469472963723</span> <span class="sc">~</span> <span class="dv">45</span>,</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.16206639288159</span> <span class="sc">~</span> <span class="dv">46</span>,</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.17895804742641</span> <span class="sc">~</span> <span class="dv">47</span>,</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.19533620671360</span> <span class="sc">~</span> <span class="dv">48</span>,</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.21202975619422</span> <span class="sc">~</span> <span class="dv">49</span>,</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.22830663928816</span> <span class="sc">~</span> <span class="dv">50</span>,</span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.24486516084873</span> <span class="sc">~</span> <span class="dv">51</span>,</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.25934770704997</span> <span class="sc">~</span> <span class="dv">52</span>,</span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.27457912196537</span> <span class="sc">~</span> <span class="dv">53</span>,</span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.29007370896616</span> <span class="sc">~</span> <span class="dv">54</span>,</span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.30555527524319</span> <span class="sc">~</span> <span class="dv">55</span>,</span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.32162833675565</span> <span class="sc">~</span> <span class="dv">56</span>,</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.33676297950084</span> <span class="sc">~</span> <span class="dv">57</span>,</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.35264238040105</span> <span class="sc">~</span> <span class="dv">58</span>,</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.36804654346338</span> <span class="sc">~</span> <span class="dv">59</span>,</span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.38288012607080</span> <span class="sc">~</span> <span class="dv">60</span>,</span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.39744314980323</span> <span class="sc">~</span> <span class="dv">61</span>,</span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.41176454483231</span> <span class="sc">~</span> <span class="dv">62</span>,</span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.42661080994812</span> <span class="sc">~</span> <span class="dv">63</span>,</span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.44143904753026</span> <span class="sc">~</span> <span class="dv">64</span>,</span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.45616599664439</span> <span class="sc">~</span> <span class="dv">65</span>,</span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.47046406570842</span> <span class="sc">~</span> <span class="dv">66</span>,</span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.48541673804140</span> <span class="sc">~</span> <span class="dv">67</span>,</span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.50082593655723</span> <span class="sc">~</span> <span class="dv">68</span>,</span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.51575906913073</span> <span class="sc">~</span> <span class="dv">69</span>,</span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.53179041411307</span> <span class="sc">~</span> <span class="dv">70</span>,</span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.54847145496397</span> <span class="sc">~</span> <span class="dv">71</span>,</span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.56450211494358</span> <span class="sc">~</span> <span class="dv">72</span>,</span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.58056343072585</span> <span class="sc">~</span> <span class="dv">73</span>,</span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.59622536132146</span> <span class="sc">~</span> <span class="dv">74</span>,</span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.61220575225961</span> <span class="sc">~</span> <span class="dv">75</span>,</span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.62980229727812</span> <span class="sc">~</span> <span class="dv">76</span>,</span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.64633742797854</span> <span class="sc">~</span> <span class="dv">77</span>,</span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.66270836678796</span> <span class="sc">~</span> <span class="dv">78</span>,</span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.68071428443369</span> <span class="sc">~</span> <span class="dv">79</span>,</span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.69965721597721</span> <span class="sc">~</span> <span class="dv">80</span>,</span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.71924640657084</span> <span class="sc">~</span> <span class="dv">81</span>,</span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.73853621699103</span> <span class="sc">~</span> <span class="dv">82</span>,</span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.75778147760295</span> <span class="sc">~</span> <span class="dv">83</span>,</span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.77728756159785</span> <span class="sc">~</span> <span class="dv">84</span>,</span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.79719224080293</span> <span class="sc">~</span> <span class="dv">85</span>,</span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.81884538728167</span> <span class="sc">~</span> <span class="dv">86</span>,</span>
+<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.83956718767238</span> <span class="sc">~</span> <span class="dv">87</span>,</span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.86117343797221</span> <span class="sc">~</span> <span class="dv">88</span>,</span>
+<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.88458357309819</span> <span class="sc">~</span> <span class="dv">89</span>,</span>
+<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.90679669457193</span> <span class="sc">~</span> <span class="dv">90</span>,</span>
+<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.93187604974332</span> <span class="sc">~</span> <span class="dv">91</span>,</span>
+<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.95563732458239</span> <span class="sc">~</span> <span class="dv">92</span>,</span>
+<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">2.98192663471240</span> <span class="sc">~</span> <span class="dv">93</span>,</span>
+<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.01041956645050</span> <span class="sc">~</span> <span class="dv">94</span>,</span>
+<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>           </span>
+<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.04211557588171</span> <span class="sc">~</span> <span class="dv">95</span>,</span>
+<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.07653689699372</span> <span class="sc">~</span> <span class="dv">96</span>,</span>
+<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.11838513945413</span> <span class="sc">~</span> <span class="dv">97</span>,</span>
+<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.17159971150431</span> <span class="sc">~</span> <span class="dv">98</span>,</span>
+<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>           raw_epts <span class="sc">&lt;=</span> <span class="fl">3.24849418211424</span> <span class="sc">~</span> <span class="dv">99</span>,</span>
+<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a>           <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">100</span>)) </span>
+<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a><span class="do">## Extra line to remove missings</span></span>
+<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a>df_months<span class="sc">$</span>percentile_epts[<span class="fu">is.na</span>(df_months<span class="sc">$</span>raw_epts)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>As you can see below, this process results in a dataset that captures changes in age and dialysis time, allowing for the calculation of EPTS scores over a patient’s time on the waitlist.</p>
+<p>As you can see below, this process results in a dataset that captures changes in age and dialysis time, allowing for the calculation of EPTS scores over a patient’s time on the waitlist. For this pre-empitvely listed candidate, being put on dialysis initially raises their EPTS score since “no dialysis” has a positive coefficient in the model. But over time, as dialysis time and age increases, their EPTS continues to increase.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>

@@ -169,7 +169,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>In this post, we will explain the methodology and applications of propensity score matching.</p>
 <p>The purpose of propensity score matching is to identify observations where the covariates that determine assignment to a particular group have similar values across different groups. In our example, we want to identify recipients of single kidney transplants whose Expected Post Transplant Survival (EPTS) characteristics are similar to those of recipients of en bloc kidneys. By identifying such patients, we will be able to better compare post-transplant survival outcomes by accounting for other possible confounding factors. In this case, these covariates are age, dialysis, diabetes, and previous transplant.</p>
 <p>Note that we did <strong>not</strong> match based on donor characteristics. This is because after donor kidneys are assigned a sequence, they are treated equally to other kidneys in that sequence, so donor characteristics have no additional influence on assignment to each patient. When propensity score matching it is important to match only on those covariates which impact assignment of the treatment to each group.</p>
 <p>Here’s a look at our dataframe:</p>
@@ -178,18 +177,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <table class="table table-sm table-striped small">
 <colgroup>
 <col style="width: 4%">
-<col style="width: 8%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 21%">
+<col style="width: 9%">
 <col style="width: 15%">
-<col style="width: 15%">
-<col style="width: 19%">
-<col style="width: 8%">
 <col style="width: 14%">
-<col style="width: 13%">
 </colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
-<th style="text-align: right;">PX_ID</th>
 <th style="text-align: right;">enbloc_under8</th>
 <th style="text-align: right;">REC_AGE_AT_TX</th>
 <th style="text-align: right;">dialysis_duration</th>
@@ -201,7 +198,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: right;">1423051</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">46</td>
 <td style="text-align: right;">1.7397260</td>
@@ -211,7 +207,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td style="text-align: left;">33</td>
-<td style="text-align: right;">1336277</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">64</td>
 <td style="text-align: right;">0.0000000</td>
@@ -221,7 +216,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td style="text-align: left;">46</td>
-<td style="text-align: right;">1375918</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">25</td>
 <td style="text-align: right;">0.0000000</td>
@@ -231,7 +225,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td style="text-align: left;">73</td>
-<td style="text-align: right;">1384452</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">51</td>
 <td style="text-align: right;">0.0000000</td>
@@ -241,7 +234,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td style="text-align: left;">80</td>
-<td style="text-align: right;">1331786</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">66</td>
 <td style="text-align: right;">2.7315068</td>
@@ -251,7 +243,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td style="text-align: left;">101</td>
-<td style="text-align: right;">1337163</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">43</td>
 <td style="text-align: right;">1.8246575</td>
@@ -261,7 +252,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td style="text-align: left;">104</td>
-<td style="text-align: right;">1331806</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">67</td>
 <td style="text-align: right;">0.4958904</td>
@@ -271,7 +261,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td style="text-align: left;">106</td>
-<td style="text-align: right;">1421143</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">51</td>
 <td style="text-align: right;">0.0000000</td>
@@ -281,7 +270,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td style="text-align: left;">107</td>
-<td style="text-align: right;">1343445</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">43</td>
 <td style="text-align: right;">0.6136986</td>
@@ -291,7 +279,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td style="text-align: left;">109</td>
-<td style="text-align: right;">1351642</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">57</td>
 <td style="text-align: right;">0.9260274</td>
@@ -304,7 +291,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <ul>
-<li><p><strong>PX_ID</strong> is a unique patient identifier</p></li>
 <li><p><strong>enbloc_under8</strong> is an indicator for whether the patient received an en bloc kidney from a donor weighing &lt; 8kg</p></li>
 <li><p><strong>REC_AGE_AT_TX</strong> is the recipient’s age at time of transplant</p></li>
 <li><p><strong>dialysis_duration</strong> is the time in years that a patient was on dialysis before transplant</p></li>
