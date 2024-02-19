@@ -1,0 +1,265 @@
+---
+title: "Time Varying EPTS"
+---
+
+In the SRTR Standard Analysis Files, the CAND_KIPA file includes information on candidates listed for kidney and/or pancreas transplants. From this file, it is possible to calculate a candidate EPTS score at listing, but it does not directly account for the change in dialysis time and age during a patient's time on the waitlist that can lead to higher EPTS scores over time. To perform analyses on EPTS scores that change over time, it is possible to request an enhanced SAF from the SRTR that includes time-varying EPTS. Alternatively, you can consctruct a discrete time dataset that can be used to calculate EPTS at different periods during a candidate's time on the waitlist. In this post we will address how we constructed such a dataset for our manuscript *Association of Race and Ethnicity with Priority for Deceased Donor Kidney Transplant.*
+
+First, let's take a look at our data:
+
+```{r}
+#| echo: false
+#| warning: false
+
+load("C:/Users/mhwhi/Downloads/df_cand_kipa.Rdata")
+library(discSurv)
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+
+df_epts_varying = df_cand_kipa %>%
+  select(PX_ID, min_list_date, previous_TX, dialysis,  waitlist_end_date, wait_time,
+         dialysis_time_at_list, diabetes, age, CAN_DIAL_DT, 
+         last_wait_date, age_months, race, age_group)
+
+knitr::kable(
+  df_epts_varying[1:10, 1:14]
+) 
+```
+
+-   **PX_ID** is a unique patient identifier
+
+-   **min_list_date** is the earliest date a patient is listed for a transplant. This takes into account patients who are listed at multiple centers concurrently. We will explain how to address such patients in another post.
+
+-   **previous_TX** is an indicator for whether the patient has received a previous transplant
+
+-   **dialysis** is an indicator for whether the patient was on dialysis when they were listed
+
+-   **waitlist_end_date** is the date that the patient received a transplant or was otherwise removed from the waiting list
+
+-   **wait_time** is the time between the candidate's listing and their waitlist end date
+
+-   **dialysis_time_at_list** is how long the patient was on dialysis before being placed on the waitlist
+
+-   **diabetes** is an indicator for whether the candidate has diabetes
+
+-   **age** is the candidate's age at listing
+
+-   **CAN_DIAL_DT** is the date the candidate started dialysis (if at all)
+
+-   **last_wait_date** is the latest date the patient is listed for transplant (for those patients who are listed at multiple centers)
+
+-   **age_months** is the candidate's age in months at listing
+
+-   **race** is the patient's race/ethnicity
+
+-   **age_group** is the age group of the patient at listing
+
+With these variables we would be able to calculate a patient's EPTS score at listing, but neither the age nor dialysis time variables capture changes over time. To address this, we can create a discrete time data set with 1 month intervals such that the age and dialysis time increase every month that the candidate is on the waitlist.
+
+First, we will flag patient's who were pre-emptively listed and then started dialysis during their time on the waitlist:
+
+```{r}
+df_epts_varying$dialysis_during_waitlist <- ifelse(df_epts_varying$CAN_DIAL_DT > df_epts_varying$min_list_date, 1, 0)
+df_epts_varying$dialysis_during_waitlist[is.na(df_epts_varying$dialysis_during_waitlist)] <- 0
+
+```
+
+We will then consolidate the two wait time variables and calculate the total months that each patient was on the waitlist:
+
+```{r}
+df_epts_varying$waitlist_end_date[is.na(df_epts_varying$waitlist_end_date)] <- df_epts_varying$last_wait_date[is.na(df_epts_varying$waitlist_end_date)]
+df_epts_varying = df_epts_varying  %>% mutate(time_period = as.integer(floor((wait_time)*12/365)))
+
+```
+
+To properly encode the dialysis time for patients who begin dialysis after listing, we use a time_until_dialysis variable, which we will compare to the patient's time on the waitlist to trigger the dialysis_time variable to start increasing
+
+```{r}
+df_epts_varying = df_epts_varying %>% mutate(time_until_dialysis = ifelse(dialysis_during_waitlist == 1, as.integer(floor((CAN_DIAL_DT - min_list_date)*12/365)), 0))
+
+```
+
+Using the time period variable, we construct a dataset which has an observation for each month the patient is on the waitlist. This new dataset also uses the age in month at listing for the first observed age and then increases by 1 month for every new observation for that patient. Similarly, it increases dialysis time by 1 month for each observation for patients on dialysis.
+
+```{r}
+expanded_data <- df_epts_varying %>%
+  tidyr::uncount(weights = time_period + 1) %>%
+  group_by(PX_ID) %>%
+  mutate(time = ifelse(row_number() <= time_period + 1, row_number() - 1, NA),
+    time = ifelse(is.na(time), max(time, na.rm = TRUE), time),
+    age = age_months/12
+  ) %>%
+  mutate(age = age + row_number()/12)
+
+expanded_data = expanded_data %>% 
+  mutate(dialysis_after_waitlist = case_when(
+    dialysis_during_waitlist == 1 & (time - time_until_dialysis) < 0 ~ 0, 
+    dialysis_during_waitlist == 1 & (time - time_until_dialysis) >= 0 ~ (time - time_until_dialysis), 
+    dialysis_during_waitlist == 0 & dialysis == 1 ~ (time - time_until_dialysis),
+    TRUE ~ 0))
+
+expanded_data = expanded_data %>% mutate(dialysis_time = dialysis_time_at_list + dialysis_after_waitlist/12)
+
+```
+
+To calculate the EPTS score for each patient during each month on the waitlist, we prep the variables as follows:
+
+```{r}
+df_months <- expanded_data %>%
+  select(PX_ID, age, dialysis, previous_TX, dialysis_time, diabetes, race, time) %>%
+  mutate(age = as.numeric(age),
+         dialysis_time = as.numeric(dialysis_time),
+         diabetes = as.numeric(as.character(diabetes)),
+         dialysis = ifelse(dialysis_time > 0, 1, 0))
+```
+
+and then use the EPTS mapping table (from 2021):
+
+```{r}
+
+df_months <- df_months %>% 
+  mutate(raw_epts = 
+           0.047*pmax(age - 25, 0) - 
+           0.015*(diabetes==1)*pmax(age - 25, 0) +
+           0.398*(previous_TX==1) - 0.237*(diabetes==1)*(previous_TX==1) +
+           0.315*log(dialysis_time + 1) - 0.099*(diabetes==1)*log(dialysis_time + 1) +
+           0.130*(dialysis_time == 0) - 0.348*(diabetes==1)*(dialysis_time == 0) +  
+           1.262*(diabetes==1))
+
+df_months <- df_months %>%
+  mutate(percentile_epts = case_when(
+           raw_epts <= 0.01842385502984 ~ 0,
+           raw_epts <= 0.23587063655031 ~ 1,
+           raw_epts <= 0.41885215605749 ~ 2,
+           raw_epts <= 0.52800000000000 ~ 3,
+           raw_epts <= 0.62852561015766 ~ 4,
+           
+           raw_epts <= 0.71352703627652 ~ 5,
+           raw_epts <= 0.79220296573099 ~ 6,
+           raw_epts <= 0.86714433496842 ~ 7,
+           raw_epts <= 0.93047980835044 ~ 8,
+           raw_epts <= 0.99391854893908 ~ 9,
+           
+           raw_epts <= 1.05598976270380 ~ 10,
+           raw_epts <= 1.11434794060852 ~ 11,
+           raw_epts <= 1.17045574165807 ~ 12,
+           raw_epts <= 1.22030049020253 ~ 13,
+           raw_epts <= 1.27212500074301 ~ 14,
+           
+           raw_epts <= 1.31913766912690 ~ 15,
+           raw_epts <= 1.36438535249829 ~ 16,
+           raw_epts <= 1.41168240930869 ~ 17,
+           raw_epts <= 1.45433196440794 ~ 18,
+           raw_epts <= 1.49473716632444 ~ 19,
+           
+           raw_epts <= 1.53514236824093 ~ 20,
+           raw_epts <= 1.57300507228037 ~ 21,
+           raw_epts <= 1.60810335386721 ~ 22,
+           raw_epts <= 1.64297604380561 ~ 23,
+           raw_epts <= 1.67354110859117 ~ 24,
+           
+           raw_epts <= 1.70255373032170 ~ 25,
+           raw_epts <= 1.73150650239562 ~ 26,
+           raw_epts <= 1.75869376757638 ~ 27,
+           raw_epts <= 1.78477960301164 ~ 28,
+           raw_epts <= 1.81180219028063 ~ 29,
+           
+           raw_epts <= 1.83683495289066 ~ 30,
+           raw_epts <= 1.86060232717317 ~ 31,
+           raw_epts <= 1.88375164234518 ~ 32,
+           raw_epts <= 1.90727234572108 ~ 33,
+           raw_epts <= 1.92941067761807 ~ 34,
+           
+           raw_epts <= 1.95149964313427 ~ 35,
+           raw_epts <= 1.97370841889117 ~ 36,
+           raw_epts <= 1.99414162335253 ~ 37,
+           raw_epts <= 2.01486542476192 ~ 38,
+           raw_epts <= 2.03323308735222 ~ 39,
+           
+           raw_epts <= 2.05397604380561 ~ 40,
+           raw_epts <= 2.07327619854998 ~ 41,
+           raw_epts <= 2.09202182261888 ~ 42,
+           raw_epts <= 2.11055715263518 ~ 43,
+           raw_epts <= 2.12710952613370 ~ 44,
+           
+           raw_epts <= 2.14469472963723 ~ 45,
+           raw_epts <= 2.16206639288159 ~ 46,
+           raw_epts <= 2.17895804742641 ~ 47,
+           raw_epts <= 2.19533620671360 ~ 48,
+           raw_epts <= 2.21202975619422 ~ 49,
+           
+           raw_epts <= 2.22830663928816 ~ 50,
+           raw_epts <= 2.24486516084873 ~ 51,
+           raw_epts <= 2.25934770704997 ~ 52,
+           raw_epts <= 2.27457912196537 ~ 53,
+           raw_epts <= 2.29007370896616 ~ 54,
+           
+           raw_epts <= 2.30555527524319 ~ 55,
+           raw_epts <= 2.32162833675565 ~ 56,
+           raw_epts <= 2.33676297950084 ~ 57,
+           raw_epts <= 2.35264238040105 ~ 58,
+           raw_epts <= 2.36804654346338 ~ 59,
+           
+           raw_epts <= 2.38288012607080 ~ 60,
+           raw_epts <= 2.39744314980323 ~ 61,
+           raw_epts <= 2.41176454483231 ~ 62,
+           raw_epts <= 2.42661080994812 ~ 63,
+           raw_epts <= 2.44143904753026 ~ 64,
+           
+           raw_epts <= 2.45616599664439 ~ 65,
+           raw_epts <= 2.47046406570842 ~ 66,
+           raw_epts <= 2.48541673804140 ~ 67,
+           raw_epts <= 2.50082593655723 ~ 68,
+           raw_epts <= 2.51575906913073 ~ 69,
+           
+           raw_epts <= 2.53179041411307 ~ 70,
+           raw_epts <= 2.54847145496397 ~ 71,
+           raw_epts <= 2.56450211494358 ~ 72,
+           raw_epts <= 2.58056343072585 ~ 73,
+           raw_epts <= 2.59622536132146 ~ 74,
+           
+           raw_epts <= 2.61220575225961 ~ 75,
+           raw_epts <= 2.62980229727812 ~ 76,
+           raw_epts <= 2.64633742797854 ~ 77,
+           raw_epts <= 2.66270836678796 ~ 78,
+           raw_epts <= 2.68071428443369 ~ 79,
+           
+           raw_epts <= 2.69965721597721 ~ 80,
+           raw_epts <= 2.71924640657084 ~ 81,
+           raw_epts <= 2.73853621699103 ~ 82,
+           raw_epts <= 2.75778147760295 ~ 83,
+           raw_epts <= 2.77728756159785 ~ 84,
+           
+           raw_epts <= 2.79719224080293 ~ 85,
+           raw_epts <= 2.81884538728167 ~ 86,
+           raw_epts <= 2.83956718767238 ~ 87,
+           raw_epts <= 2.86117343797221 ~ 88,
+           raw_epts <= 2.88458357309819 ~ 89,
+           
+           raw_epts <= 2.90679669457193 ~ 90,
+           raw_epts <= 2.93187604974332 ~ 91,
+           raw_epts <= 2.95563732458239 ~ 92,
+           raw_epts <= 2.98192663471240 ~ 93,
+           raw_epts <= 3.01041956645050 ~ 94,
+           
+           raw_epts <= 3.04211557588171 ~ 95,
+           raw_epts <= 3.07653689699372 ~ 96,
+           raw_epts <= 3.11838513945413 ~ 97,
+           raw_epts <= 3.17159971150431 ~ 98,
+           raw_epts <= 3.24849418211424 ~ 99,
+           TRUE ~ 100)) 
+  
+## Extra line to remove missings
+df_months$percentile_epts[is.na(df_months$raw_epts)] <- NA
+
+```
+
+As you can see below, this process results in a dataset that captures changes in age and dialysis time, allowing for the calculation of EPTS scores over a patient's time on the waitlist.
+
+```{r}
+#| echo: false
+knitr::kable(
+  df_months[1:10, 1:11]
+) 
+```
