@@ -9,7 +9,7 @@
 <meta name="author" content="Kevin Zhang">
 <meta name="dcterms.date" content="2024-02-19">
 
-<title>HCA Blog - Intervals in US-CRS</title>
+<title>HCA Blog - Constructing Intervals for the US-CRS</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -147,7 +147,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Intervals in US-CRS</h1>
+<h1 class="title">Constructing Intervals for the US-CRS</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Data Structures</div>
     <div class="quarto-category">Heart Allocation</div>
@@ -181,13 +181,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This article serves as an explanation for the process of creating the 14-day interval data used in “Development and Validation of a Risk Score Predicting Death Without Transplant in Adult Heart Transplant Candidates” by Zhang, Narang, Jasseron, et al., *JAMA*, Feb 2024.</p>
+<p>This article serves as an explanation for the process of creating the 14-day interval data used in “Development and Validation of a Risk Score Predicting Death Without Transplant in Adult Heart Transplant Candidates” by Zhang, Narang, Jasseron, et al., <em>JAMA</em>, Feb 2024.</p>
 <p><em>Note: Any data used in this post are fabricated and are unrelated to the actual data used in constructing the US-CRS model.</em></p>
 <section id="setup-of-the-data" class="level3">
 <h3 class="anchored" data-anchor-id="setup-of-the-data">1. Setup of the data</h3>
 <p>One of the more difficult aspects of a statistical project, in my opinion, involves the tidying and setup of your initial data. Outside of coursework, rarely will you see data that is ready to go for analysis. It will often be partially missing, contain errors (especially if a human is involved in entering it, which will likely be the case!), or require some preparation in order to answer a question. We focus on this last aspect here.</p>
 <p>The US-CRS model begins with data on patients who are on the wait list for a heart transplant that is available from the Scientific Registry of Transplant Recipients (SRTR). Each patient will have clinical data- think things like blood pressure or lab tests- recorded when they get on the wait list, and recorded again if something occurs, such as being transplanted.</p>
-<p>This type of data is often referred to as **panel data** or **longitudinal data**. Each candidate also has a time component: how long on the wait list. A person might be on the wait list for 112 days, but have 5 events during these 112 days, each with a new set of clinical data. Start time is when time is 0.</p>
+<p>This type of data is often referred to as <strong>panel data</strong> or <strong>longitudinal data</strong>. Each candidate also has a time component: how long on the wait list. A person might be on the wait list for 112 days, but have 5 events during these 112 days, each with a new set of clinical data. Start time is when time is 0.</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -293,7 +293,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </div>
 </div>
-<p>This process is known as **discretization**, as we are breaking the flow of time on the wait list into even individual, or **discrete**, blocks. We picked 14 days for each block, since that was the most common amount of time for a patient to spend at a priority level before priority could be reconsidered, according to official Organ Procurement and Transplantation Network (OPTN) guidelines.</p>
+<p>This process is known as <strong>discretization</strong>, as we are breaking the flow of time on the wait list into even individual, or <strong>discrete</strong>, blocks. We picked 14 days for each block, since that was the most common amount of time for a patient to spend at a priority level before priority could be reconsidered, according to official Organ Procurement and Transplantation Network (OPTN) guidelines.</p>
 <p>We do this so that we can use the most up-to-date clinical data when creating a measure of medical urgency for transplantation. For a situation like the one below, the discrete blocks capture the many changes in blood pressure:</p>
 <div class="cell">
 <div class="cell-output-display">
@@ -311,7 +311,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>1. The ending time isn’t divisible by 14.</strong></p>
 <p>Instead of 112 days, which is divisible by 14, the wait list total time is 113 days. We include the last block, which goes up to 126 days, despite the individual only spending 1 more day on the list. We do this because that’s when they got their most recent clinical data. On day 112, there’s no way to know what the results of those clinical measurements would be tomorrow.</p>
 <p><strong>2. There are gaps between data, which create empty blocks.</strong></p>
-<p>The most recent data is used to fill in the gap. If a patient had a blood pressure of 120 at 14 days, and 130 at 42 days, the block for 28 has 120 for blood pressure. This idea is known as *carrying forward* data, and is used in other official allocation scores, such as the Model for End-Stage Liver Disease (MELD).</p>
+<p>The most recent data is used to fill in the gap. If a patient had a blood pressure of 120 at 14 days, and 130 at 42 days, the block for 28 has 120 for blood pressure. This idea is known as <em>carrying forward</em> data, and is used in other official allocation scores, such as the Model for End-Stage Liver Disease (MELD).</p>
 <p>What if the very first data point doesn’t exist, so that we don’t observe a value for blood pressure until 42 days? In that case, we use missing data approaches, which replace the gap with a statistical median (middle) value or “normal” values for heart transplant patients obtained from the clinical literature.</p>
 <p><strong>3. In a single 14-day block, the data gets updated.</strong></p>
 <p>Suppose the data gets updated at 8 days, in the middle of a block. In that case, the update will be transferred to the next block (14 days), to prevent the loss of the original data at 7 days, while also incorporating the newer data. This is how the original data would look:</p>
@@ -426,8 +426,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </div>
 </div>
-<p>We want to discretize this example dataset, which has every problem we previously described. We first create the dataset **df_setup**, and create a **counts** variable, which represents the number of 14-day blocks. The **ceiling** function ensures that we do not round down and lose time. For the first row, with 0 days, that still counts as a block, so we change any counts with 0 to 1.</p>
-<p>*Note: ID number is added here and acts as a sanity check for when you have multiple patients.*</p>
+<p>We want to discretize this example dataset, which has every problem we previously described. We first create the dataset <strong>df_setup</strong>, and create a <strong>counts</strong> variable, which represents the number of 14-day blocks. The <strong>ceiling</strong> function ensures that we do not round down and lose time. For the first row, with 0 days, that still counts as a block, so we change any counts with 0 to 1.</p>
+<p><em>Note: ID number is added here and acts as a sanity check for when you have multiple patients.</em></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">'ID_Number'</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
@@ -472,7 +472,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </div>
 </div>
-<p>The goal of the **counts** variable is to tell us how many times we need to repeat each row of the original data. In other words, we create a new **row_reps** that gives us a vector of the row number repeated the correct number of times, and can apply it to the original data to form our blocked result, **df_blocked** (note that the row numbers, 3, 3.1, 3.2, 3.3 show that row 3 have been correctly repeated 3 times):</p>
+<p>The goal of the <strong>counts</strong> variable is to tell us how many times we need to repeat each row of the original data. In other words, we create a new <strong>row_reps</strong> that gives us a vector of the row number repeated the correct number of times, and can apply it to the original data to form our blocked result, <strong>df_blocked</strong> (note that the row numbers, 3, 3.1, 3.2, 3.3 show that row 3 have been correctly repeated 3 times):</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>row_reps <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df), df_setup<span class="sc">$</span>Counts)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_blocked <span class="ot">&lt;-</span> df[row_reps, ]</span>
