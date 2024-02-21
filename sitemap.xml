@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://healthallocate.github.io/HCA-Blog/posts/uscrs_intervals.html</loc>
-    <lastmod>2024-02-20T20:56:38.745Z</lastmod>
-  </url>
-  <url>
-    <loc>https://healthallocate.github.io/HCA-Blog/posts/prop_score.html</loc>
-    <lastmod>2024-02-20T21:00:54.165Z</lastmod>
+    <loc>https://healthallocate.github.io/HCA-Blog/posts/time_varying_epts.html</loc>
+    <lastmod>2024-02-20T21:17:19.846Z</lastmod>
   </url>
   <url>
     <loc>https://healthallocate.github.io/HCA-Blog/index.html</loc>
     <lastmod>2024-02-20T20:43:11.729Z</lastmod>
   </url>
   <url>
-    <loc>https://healthallocate.github.io/HCA-Blog/posts/time_varying_epts.html</loc>
-    <lastmod>2024-02-20T21:17:19.846Z</lastmod>
+    <loc>https://healthallocate.github.io/HCA-Blog/posts/prop_score.html</loc>
+    <lastmod>2024-02-20T21:00:54.165Z</lastmod>
   </url>
 </urlset>
