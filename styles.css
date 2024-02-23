@@ -1,1 +1,7 @@
 /* css styles */
+.custom-formula {
+  width: 600px; /* Adjust the width as needed */
+  margin: 0 auto;
+  word-wrap: break-word;
+  align-content: left;/* Center the formula horizontally */
+}
